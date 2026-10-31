@@ -1,0 +1,39 @@
+pragma Singleton
+import QtQuick
+import Quickshell
+import Quickshell.Io
+
+/** Runs unlock.py with the password on stdin, alive after the hook object is gone. */
+Singleton {
+    id: root
+
+    readonly property string script: decodeURIComponent(Qt.resolvedUrl("unlock.py").toString().replace(/^file:\/\//, ""))
+    property string pending: ""
+
+    function unlock(password: string): void {
+        root.pending = password;
+        if (!proc.running) {
+            proc.stdinEnabled = true;
+            proc.running = true;
+        }
+    }
+
+    Process {
+        id: proc
+        command: ["python3", "-I", root.script]
+        onStarted: {
+            proc.write(root.pending);
+            root.pending = "";
+            proc.stdinEnabled = false; // Closes stdin, the script reads to EOF
+        }
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                console.warn(`keepassxc_unlock_exited code=${exitCode} stderr=${stderrCollector.text.trim()}`);
+            if (root.pending !== "")
+                root.unlock(root.pending);
+        }
+        stderr: StdioCollector {
+            id: stderrCollector
+        }
+    }
+}
