@@ -33,8 +33,11 @@ def keepassxc_running(bus):
 
 
 def main():
-    password = sys.stdin.read()
     databases = last_opened_databases()
+    if sys.argv[1:] == ["--list"]:
+        print("\n".join(databases))
+        return 0
+    password = sys.stdin.read()
     if not password or not databases:
         return 1
     bus = Gio.bus_get_sync(Gio.BusType.SESSION)
