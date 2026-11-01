@@ -8,7 +8,7 @@ WidgetManifest {
     name: Translation.tr("KeePassXC unlock")
     description: Translation.tr("Unlocking the screen also unlocks KeePassXC, for databases sharing the login password")
     icon: "passkey"
-    version: "1.1"
+    version: "1.2"
     author: "Berupor"
     minShellVersion: "1.5"
     dependencies: ["keepassxc", "python3"]

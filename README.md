@@ -13,7 +13,13 @@ database first opened in the current session is not in it yet.
 The password goes to `unlock.py` on stdin and from there to KeePassXC's
 `openDatabase` over the session bus, where any process of your user can watch
 it. A fingerprint unlock has no password to hand, so KeePassXC stays locked. If
-KeePassXC is not running, nothing happens.
+KeePassXC is not running, nothing happens. Turn off "Prompt to unlock database
+before searching" (Settings, Secret Service Integration): a secret lookup on a
+locked database opens an unlock dialog and blocks until it closes, and KeePassXC
+drops unlock requests meanwhile.
+`openDatabase` does not report a wrong password, so afterwards the script checks
+the Secret Service collections and logs `keepassxc_unlock_still_locked` for those
+still locked.
 
 Needs `keepassxc` and `python3` with PyGObject (`python-gobject` on Arch); the
 card greys out without them.
