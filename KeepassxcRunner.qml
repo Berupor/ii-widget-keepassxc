@@ -8,6 +8,7 @@ Singleton {
     id: root
 
     readonly property string script: decodeURIComponent(Qt.resolvedUrl("unlock.py").toString().replace(/^file:\/\//, ""))
+    property list<string> command: ["python3", "-I", root.script]
     property string pending: ""
 
     function unlock(password: string): void {
@@ -20,7 +21,7 @@ Singleton {
 
     Process {
         id: proc
-        command: ["python3", "-I", root.script]
+        command: root.command
         onStarted: {
             proc.write(root.pending);
             root.pending = "";
@@ -31,6 +32,13 @@ Singleton {
                 console.error(`keepassxc_unlock_exited code=${exitCode} stderr=${stderrCollector.text.trim()}`);
             if (root.pending !== "")
                 root.unlock(root.pending);
+        }
+        // A failed start emits neither started nor exited, only this
+        onRunningChanged: {
+            if (!proc.running && root.pending !== "") {
+                console.error(`keepassxc_unlock_start_failed command=${root.command[0]}`);
+                root.pending = "";
+            }
         }
         stderr: StdioCollector {
             id: stderrCollector

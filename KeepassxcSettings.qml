@@ -12,13 +12,17 @@ ColumnLayout {
     property list<string> databases: []
     property bool loaded: false
 
+    function shortPath(path: string): string {
+        const home = FileUtils.trimFileProtocol(Directories.home).replace(/\/+$/, "");
+        return path.startsWith(home + "/") ? "~" + path.slice(home.length) : path;
+    }
+
     Process {
         running: true
         command: ["python3", "-I", KeepassxcRunner.script, "--list"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const home = FileUtils.trimFileProtocol(Directories.home).replace(/\/+$/, "");
-                root.databases = text.split("\n").filter(p => p !== "").map(p => p.startsWith(home + "/") ? "~" + p.slice(home.length) : p);
+                root.databases = text.split("\n").filter(p => p !== "").map(root.shortPath);
                 root.loaded = true;
             }
         }
