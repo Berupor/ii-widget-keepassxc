@@ -17,7 +17,8 @@ ColumnLayout {
         command: ["python3", "-I", KeepassxcRunner.script, "--list"]
         stdout: StdioCollector {
             onStreamFinished: {
-                root.databases = text.split("\n").filter(p => p !== "").map(p => p.replace(FileUtils.trimFileProtocol(Directories.home), "~"));
+                const home = FileUtils.trimFileProtocol(Directories.home).replace(/\/+$/, "");
+                root.databases = text.split("\n").filter(p => p !== "").map(p => p.startsWith(home + "/") ? "~" + p.slice(home.length) : p);
                 root.loaded = true;
             }
         }

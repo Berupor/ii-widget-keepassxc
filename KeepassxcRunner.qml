@@ -28,7 +28,7 @@ Singleton {
         }
         onExited: exitCode => {
             if (exitCode !== 0)
-                console.warn(`keepassxc_unlock_exited code=${exitCode} stderr=${stderrCollector.text.trim()}`);
+                console.error(`keepassxc_unlock_exited code=${exitCode} stderr=${stderrCollector.text.trim()}`);
             if (root.pending !== "")
                 root.unlock(root.pending);
         }

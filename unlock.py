@@ -20,7 +20,7 @@ def last_opened_databases():
     ini = configparser.ConfigParser(interpolation=None, strict=False)
     try:
         ini.read(state_home / "keepassxc/keepassxc.ini")
-    except configparser.Error:
+    except (configparser.Error, UnicodeDecodeError):
         return []
     raw = ini.get("General", "LastOpenedDatabases", fallback="")
     # QSettings list: comma separated, entries holding a comma come quoted
@@ -62,11 +62,13 @@ def main():
         print("\n".join(databases))
         return 0
     password = sys.stdin.read()
-    if not password or not databases:
+    if not password:
         return 1
+    if not databases:
+        return 0
     bus = Gio.bus_get_sync(Gio.BusType.SESSION)
     if not keepassxc_running(bus):
-        return 1
+        return 0
     failed = 0
     for db in databases:
         try:
